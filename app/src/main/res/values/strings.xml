@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">WiPear</string>
+    <string name="app_title">WiPear 🍐</string>
+    <string name="album_filter">Album</string>
+    <string name="pick_album">Choose an album</string>
+    <string name="all_albums">All albums</string>
+    <string name="apply">Apply</string>
+    <string name="albums_count">%1$d albums</string>
+    <string name="clear_filter">Clear</string>
+    <string name="open_gallery">Open in Gallery</string>
+    <string name="no_gallery_app">No gallery app found</string>
+    <string name="mute">Mute sounds</string>
+    <string name="unmute">Unmute sounds</string>
+    <string name="muted_toast">Sounds muted</string>
+    <string name="unmuted_toast">Sounds on</string>
+    <string name="filter_active_short">%1$s</string>
+
+    <string name="permission_needed">Photo access is needed to review your images. Please grant permission in Settings.</string>
+    <string name="no_photos">No photos found for this filter.</string>
+    <string name="all_reviewed">All done! Every photo has been reviewed.</string>
+
+    <string name="trash_count">Trash (%1$d)</string>
+    <string name="date_filter">Date</string>
+
+    <string name="pick_date_range">Select a date interval</string>
+    <string name="filter_active">Filter: %1$s  (tap to clear)</string>
+    <string name="filter_applied">Date filter applied</string>
+    <string name="filter_cleared">Date filter cleared</string>
+
+    <string name="keep_label">KEEP</string>
+    <string name="trash_label">TRASH</string>
+    <string name="hint">Swipe left to trash · Swipe right to keep</string>
+    <string name="keep">Keep</string>
+    <string name="trash">Trash</string>
+
+    <string name="trash_title">To delete</string>
+    <string name="trash_header">%1$d photo(s) marked for deletion</string>
+    <string name="trash_empty">Nothing marked yet. Swipe some photos left.</string>
+    <string name="delete">Delete</string>
+    <string name="delete_all">Delete all from list</string>
+    <string name="remove_from_list">Remove from list</string>
+
+    <string name="confirm_delete_title">Delete photos?</string>
+    <string name="confirm_delete_msg">This will permanently delete %1$d photo(s) from your device.</string>
+    <string name="deleted_ok">Photos deleted</string>
+    <string name="delete_cancelled">Deletion cancelled</string>
+    <string name="delete_failed">Could not delete photos</string>
+</resources>

@@ -1,0 +1,21 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.WiPear" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorPrimaryVariant">@color/green_primary_dark</item>
+        <item name="colorOnPrimary">@color/green_on_primary</item>
+        <item name="colorSecondary">@color/green_secondary</item>
+        <item name="colorSecondaryVariant">@color/green_primary_dark</item>
+        <item name="colorOnSecondary">@color/green_on_primary</item>
+        <item name="android:statusBarColor">@color/green_bg</item>
+        <item name="android:windowBackground">@color/green_bg</item>
+        <item name="colorControlActivated">@color/green_primary</item>
+    </style>
+
+    <!-- Launch / splash screen showing the logo. -->
+    <style name="Theme.WiPear.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/green_bg</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.WiPear</item>
+    </style>
+</resources>

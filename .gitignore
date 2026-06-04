@@ -1,0 +1,36 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/app/build
+**/build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iws
+*.ipr
+
+# Keystores / signing (don't commit)
+*.jks
+*.keystore
+keystore.properties
+
+# OS
+Thumbs.db
+
+# Claude Code local settings
+.claude/
+
+# Generated APK copy on desktop is outside repo, but ignore any in tree
+*.apk
