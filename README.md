@@ -1,6 +1,6 @@
 # WiPear 🍐
 
-(Fully done with claude code)
+(generated with claude code)
 
 A swipe-to-sort photo cleaner for Android. Go through your camera roll one card at a time — swipe **left** to mark for trash, swipe **right** to keep — then permanently delete the whole trash pile in one tap.
 
