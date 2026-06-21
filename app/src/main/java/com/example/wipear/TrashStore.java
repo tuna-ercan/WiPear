@@ -6,14 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * In-memory store of photos the user swiped left (marked for deletion).
+ * In-memory store of items the user swiped left (marked for deletion).
+ * Holds photos and/or PDFs, keyed by URI so the two never collide.
  * Shared between MainActivity and TrashActivity for the lifetime of the process.
  */
 public final class TrashStore {
 
     private static final TrashStore INSTANCE = new TrashStore();
 
-    private final Map<Long, PhotoItem> marked = new LinkedHashMap<>();
+    private final Map<String, PhotoItem> marked = new LinkedHashMap<>();
 
     private TrashStore() {}
 
@@ -22,15 +23,15 @@ public final class TrashStore {
     }
 
     public void add(PhotoItem item) {
-        marked.put(item.id, item);
+        marked.put(item.key(), item);
     }
 
-    public void remove(long id) {
-        marked.remove(id);
+    public void remove(String key) {
+        marked.remove(key);
     }
 
-    public boolean contains(long id) {
-        return marked.containsKey(id);
+    public boolean contains(String key) {
+        return marked.containsKey(key);
     }
 
     public void clear() {

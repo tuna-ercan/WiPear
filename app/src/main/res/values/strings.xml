@@ -34,15 +34,35 @@
     <string name="trash">Trash</string>
 
     <string name="trash_title">To delete</string>
-    <string name="trash_header">%1$d photo(s) marked for deletion</string>
-    <string name="trash_empty">Nothing marked yet. Swipe some photos left.</string>
+    <string name="trash_header">%1$d item(s) marked for deletion</string>
+    <string name="trash_empty">Nothing marked yet. Swipe some cards left.</string>
     <string name="delete">Delete</string>
     <string name="delete_all">Delete all from list</string>
     <string name="remove_from_list">Remove from list</string>
 
-    <string name="confirm_delete_title">Delete photos?</string>
-    <string name="confirm_delete_msg">This will permanently delete %1$d photo(s) from your device.</string>
-    <string name="deleted_ok">Photos deleted</string>
+    <string name="confirm_delete_title">Delete files?</string>
+    <string name="confirm_delete_msg">This will permanently delete %1$d file(s) from your device.</string>
+    <string name="deleted_ok">Files deleted</string>
     <string name="delete_cancelled">Deletion cancelled</string>
-    <string name="delete_failed">Could not delete photos</string>
+    <string name="delete_failed">Could not delete items</string>
+    <string name="delete_failed_count">Could not delete %1$d item(s)</string>
+
+    <!-- Source toggle + PDF mode -->
+    <string name="photos_label">🖼 Photos</string>
+    <string name="videos_label">🎬 Videos</string>
+    <string name="pdfs_label">📄 PDFs</string>
+    <string name="no_videos">No videos found for this filter.</string>
+    <string name="open_video">Open video</string>
+    <string name="open_pdf">Open PDF</string>
+    <string name="no_pdf_viewer">No PDF viewer installed</string>
+    <string name="grant_access">Grant access</string>
+    <string name="no_settings_screen">Could not open the access settings screen</string>
+    <string name="pdf_need_access">WiPear needs file access to find PDFs across all your folders. Tap below, then allow “All files access”.</string>
+    <string name="pdf_none_found">No PDFs found on this device.</string>
+
+    <!-- Folder filter (PDF mode) -->
+    <string name="folder_filter">Folders</string>
+    <string name="pick_folders">Choose folders</string>
+    <string name="all_folders">All folders</string>
+    <string name="folders_count">%1$d folders</string>
 </resources>

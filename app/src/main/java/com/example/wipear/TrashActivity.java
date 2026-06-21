@@ -1,11 +1,13 @@
 package com.example.wipear;
 
+import android.app.PendingIntent;
 import android.app.RecoverableSecurityException;
 import android.content.ContentResolver;
 import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -70,7 +72,7 @@ public class TrashActivity extends AppCompatActivity {
         RecyclerView rv = findViewById(R.id.trashList);
         rv.setLayoutManager(new GridLayoutManager(this, 3));
         adapter = new TrashAdapter(items, item -> {
-            TrashStore.get().remove(item.id);
+            TrashStore.get().remove(item.key());
             refresh();
         });
         rv.setAdapter(adapter);
@@ -88,6 +90,7 @@ public class TrashActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         sound.release();
+        if (adapter != null) adapter.shutdown();
         super.onDestroy();
     }
 
@@ -127,49 +130,76 @@ public class TrashActivity extends AppCompatActivity {
     }
 
     private void performDelete() {
-        List<Uri> uris = new ArrayList<>();
-        for (PhotoItem item : items) {
-            uris.add(item.uri);
-        }
-        ContentResolver resolver = getContentResolver();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            android.app.PendingIntent pi =
-                    android.provider.MediaStore.createDeleteRequest(resolver, uris);
-            try {
-                deleteLauncher.launch(
-                        new IntentSenderRequest.Builder(pi.getIntentSender()).build());
-            } catch (Exception e) {
-                Toast.makeText(this, R.string.delete_failed,
-                        Toast.LENGTH_SHORT).show();
-            }
-            return;
-        }
-
-        // API < 30: delete directly; on Android 10 handle the recoverable prompt.
-        int deleted = 0;
-        for (Uri uri : uris) {
-            try {
-                deleted += resolver.delete(uri, null, null);
-            } catch (SecurityException se) {
-                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q
-                        && se instanceof RecoverableSecurityException) {
-                    IntentSender sender = ((RecoverableSecurityException) se)
-                            .getUserAction().getActionIntent().getIntentSender();
+        final List<PhotoItem> snapshot = new ArrayList<>(items);
+        deleteButton.setEnabled(false);
+        // PDFs (app holds all-files access) delete directly, off the main thread so a
+        // large batch can't ANR. Photos need the system dialog and are handled after.
+        new Thread(() -> {
+            ContentResolver resolver = getContentResolver();
+            final List<String> removedKeys = new ArrayList<>();
+            final List<Uri> photoUris = new ArrayList<>();
+            int failed = 0;
+            for (PhotoItem item : snapshot) {
+                if (item.isPdf) {
+                    boolean ok = false;
                     try {
-                        deleteLauncher.launch(
-                                new IntentSenderRequest.Builder(sender).build());
+                        ok = resolver.delete(item.uri, null, null) > 0;
                     } catch (Exception ignored) {
-                        Toast.makeText(this, R.string.delete_failed,
-                                Toast.LENGTH_SHORT).show();
+                        ok = false;
                     }
-                    return;
+                    if (ok) removedKeys.add(item.key());
+                    else failed++;
+                } else {
+                    photoUris.add(item.uri);
                 }
             }
+            final int pdfFailed = failed;
+            runOnUiThread(() -> {
+                for (String key : removedKeys) TrashStore.get().remove(key);
+                afterPdfDelete(removedKeys.size(), pdfFailed, photoUris);
+            });
+        }).start();
+    }
+
+    private void afterPdfDelete(int pdfDeleted, int pdfFailed, List<Uri> photoUris) {
+        deleteButton.setEnabled(true);
+
+        if (!photoUris.isEmpty()) {
+            ContentResolver resolver = getContentResolver();
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    PendingIntent pi = MediaStore.createDeleteRequest(resolver, photoUris);
+                    deleteLauncher.launch(
+                            new IntentSenderRequest.Builder(pi.getIntentSender()).build());
+                    return; // result handler reports + refreshes for the photo part
+                }
+                // API < 30: delete directly; on Android 10 handle the recoverable prompt.
+                int deleted = 0;
+                for (Uri uri : photoUris) {
+                    try {
+                        deleted += resolver.delete(uri, null, null);
+                    } catch (SecurityException se) {
+                        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q
+                                && se instanceof RecoverableSecurityException) {
+                            IntentSender sender = ((RecoverableSecurityException) se)
+                                    .getUserAction().getActionIntent().getIntentSender();
+                            deleteLauncher.launch(
+                                    new IntentSenderRequest.Builder(sender).build());
+                            return;
+                        }
+                    }
+                }
+                if (deleted > 0) TrashStore.get().clear();
+            } catch (Exception e) {
+                Toast.makeText(this, R.string.delete_failed, Toast.LENGTH_SHORT).show();
+            }
         }
-        if (deleted > 0) {
-            TrashStore.get().clear();
-            sound.deleted();
+
+        if (pdfDeleted > 0) sound.deleted();
+        if (pdfFailed > 0) {
+            Toast.makeText(this, getString(R.string.delete_failed_count, pdfFailed),
+                    Toast.LENGTH_LONG).show();
+        } else if (pdfDeleted > 0) {
             Toast.makeText(this, R.string.deleted_ok, Toast.LENGTH_SHORT).show();
         }
         refresh();

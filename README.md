@@ -8,13 +8,14 @@ The name is a pun on *swipe* + *pear* (and yes, the pear branding is on purpose)
 
 ## Features
 
-- **Swipe deck** — photos appear one at a time as cards. Sensitive, short-distance swipes.
-- **Trash pile** — left-swipes pile up in a grid you can review before deleting.
-- **One-tap bulk delete** — uses Android's native `MediaStore` delete request (scoped-storage safe on Android 10+).
-- **Date filter** — show only photos taken inside a date range.
-- **Album filter** — multi-select which albums to include.
+- **Three sources, one screen** — a toggle switches the swipe deck between **🖼 Photos**, **🎬 Videos**, and **📄 PDFs** without leaving the main screen.
+- **Swipe deck** — items appear one at a time as cards. Sensitive, short-distance swipes.
+- **Trash pile** — left-swipes pile up in a grid you can review before deleting (PDF cards show a rendered first-page thumbnail).
+- **One-tap bulk delete** — photos/videos use Android's native `MediaStore` delete request (scoped-storage safe); PDFs are deleted directly via all-files access.
+- **Date filter** — show only items inside a date range (works for all three sources).
+- **Album / Folder filter** — multi-select which photo/video albums or PDF folders to include.
 - **Sound effects** — short beeps for keep / trash / delete, with a persisted mute toggle.
-- **Open in Gallery** — jump straight to the current photo in your gallery app.
+- **Open** — jump straight to the current photo, video, or PDF in the relevant app.
 - **Custom adaptive icon + splash screen.**
 - **Green Material theme** end-to-end.
 

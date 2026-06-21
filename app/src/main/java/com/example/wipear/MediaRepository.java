@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Loads images from the device's MediaStore, optionally filtered by date and album. */
+/** Loads images or videos from MediaStore, optionally filtered by date and album. */
 public final class MediaRepository {
 
     private MediaRepository() {}
@@ -30,25 +30,37 @@ public final class MediaRepository {
         }
     }
 
+    public static List<PhotoItem> loadImages(Context context, long startMs, long endMs,
+                                             java.util.Collection<String> bucketIds) {
+        return loadMedia(context, MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                startMs, endMs, bucketIds, false);
+    }
+
+    public static List<PhotoItem> loadVideos(Context context, long startMs, long endMs,
+                                             java.util.Collection<String> bucketIds) {
+        return loadMedia(context, MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                startMs, endMs, bucketIds, true);
+    }
+
     /**
      * @param startMs   inclusive lower bound (epoch millis), or Long.MIN_VALUE for none
      * @param endMs     inclusive upper bound (epoch millis), or Long.MAX_VALUE for none
      * @param bucketIds album bucket ids to include; null or empty = all albums
      */
-    public static List<PhotoItem> loadImages(Context context, long startMs, long endMs,
-                                             java.util.Collection<String> bucketIds) {
+    private static List<PhotoItem> loadMedia(Context context, Uri collection, long startMs,
+                                             long endMs, java.util.Collection<String> bucketIds,
+                                             boolean isVideo) {
         List<PhotoItem> result = new ArrayList<>();
 
-        Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         String[] projection = {
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.DATE_TAKEN,
-                MediaStore.Images.Media.DATE_ADDED,
-                MediaStore.Images.Media.BUCKET_ID,
-                MediaStore.Images.Media.BUCKET_DISPLAY_NAME
+                MediaStore.MediaColumns._ID,
+                MediaStore.MediaColumns.DISPLAY_NAME,
+                MediaStore.MediaColumns.DATE_TAKEN,
+                MediaStore.MediaColumns.DATE_ADDED,
+                MediaStore.MediaColumns.BUCKET_ID,
+                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME
         };
-        String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
+        String sortOrder = MediaStore.MediaColumns.DATE_ADDED + " DESC";
 
         String selection = null;
         String[] selectionArgs = null;
@@ -61,8 +73,7 @@ public final class MediaRepository {
                 placeholders.append('?');
                 selectionArgs[i++] = id;
             }
-            selection = MediaStore.Images.Media.BUCKET_ID
-                    + " IN (" + placeholders + ")";
+            selection = MediaStore.MediaColumns.BUCKET_ID + " IN (" + placeholders + ")";
         }
 
         ContentResolver resolver = context.getContentResolver();
@@ -71,12 +82,12 @@ public final class MediaRepository {
             if (cursor == null) {
                 return result;
             }
-            int idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-            int nameCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
-            int takenCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN);
-            int addedCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED);
+            int idCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID);
+            int nameCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
+            int takenCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN);
+            int addedCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED);
             int albumCol = cursor.getColumnIndexOrThrow(
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+                    MediaStore.MediaColumns.BUCKET_DISPLAY_NAME);
 
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(idCol);
@@ -90,34 +101,41 @@ public final class MediaRepository {
                     continue;
                 }
 
-                String album = cursor.isNull(albumCol)
-                        ? "" : cursor.getString(albumCol);
+                String album = cursor.isNull(albumCol) ? "" : cursor.getString(albumCol);
                 Uri uri = ContentUris.withAppendedId(collection, id);
-                result.add(new PhotoItem(id, uri, name != null ? name : "image",
-                        album != null ? album : "", effectiveMs));
+                result.add(new PhotoItem(id, uri,
+                        name != null ? name : (isVideo ? "video" : "image"),
+                        album != null ? album : "", effectiveMs, false, isVideo));
             }
         }
         return result;
     }
 
-    /** Lists the device's photo albums (buckets) with photo counts. */
+    /** Lists the device's photo albums (buckets) with counts. */
     public static List<Album> loadAlbums(Context context) {
+        return loadBuckets(context, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+    }
+
+    /** Lists the device's video albums (buckets) with counts. */
+    public static List<Album> loadVideoAlbums(Context context) {
+        return loadBuckets(context, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+    }
+
+    private static List<Album> loadBuckets(Context context, Uri collection) {
         Map<String, Album> byId = new LinkedHashMap<>();
-        Uri collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         String[] projection = {
-                MediaStore.Images.Media.BUCKET_ID,
-                MediaStore.Images.Media.BUCKET_DISPLAY_NAME
+                MediaStore.MediaColumns.BUCKET_ID,
+                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME
         };
-        String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
+        String sortOrder = MediaStore.MediaColumns.DATE_ADDED + " DESC";
 
         ContentResolver resolver = context.getContentResolver();
         try (Cursor cursor = resolver.query(
                 collection, projection, null, null, sortOrder)) {
             if (cursor != null) {
-                int idCol = cursor.getColumnIndexOrThrow(
-                        MediaStore.Images.Media.BUCKET_ID);
+                int idCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_ID);
                 int nameCol = cursor.getColumnIndexOrThrow(
-                        MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+                        MediaStore.MediaColumns.BUCKET_DISPLAY_NAME);
                 while (cursor.moveToNext()) {
                     String bid = cursor.isNull(idCol) ? null : cursor.getString(idCol);
                     if (bid == null) continue;
